@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { ArcballControls } from 'three/examples/jsm/controls/ArcballControls'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import Selector from './Selector'
 
@@ -41,9 +41,10 @@ const App = () => {
         renderer.setSize(width, height)
         mount.appendChild(renderer.domElement)
 
-        // OrbitControls
-        const controls = new OrbitControls(camera, renderer.domElement)
-        controls.mouseButtons.RIGHT = null // Disable right-click orbiting
+        // ArcballControls
+        const controls = new ArcballControls(camera, renderer.domElement, scene)
+        controls.enablePan = false
+        controls.setGizmosVisible(false)
 
         // Animation loop
         let animationId
@@ -109,7 +110,6 @@ const App = () => {
                     }
                 })
                 scene.add(object)
-                console.log('OBJ loaded successfully:', object)
             },
             undefined,
             (error) => {
