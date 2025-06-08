@@ -8,7 +8,7 @@ const App = () => {
     const mountRef = useRef(null)
     const sceneRef = useRef(null)
 
-    const options = [
+    const sphere_options = [
         { value: 'poisson', label: 'Poisson Surface Reconstruction' },
         { value: 'marching_cubes', label: 'Marching Cubes' },
         { value: 'marching_tetrahedra', label: 'Marching Tetrahedra' },
@@ -16,6 +16,14 @@ const App = () => {
         { value: 'marching_cubes_simplified', label: 'Marching Cubes Simplified' },
         { value: 'marching_tetrahedra_simplified', label: 'Marching Tetrahedra Simplified' },
     ]
+
+    const bunny_options = [
+        { value: 'Bunny10m', label: 'Bunny 10.000 points' },
+        { value: 'Bunny5m', label: 'Bunny 5.000 points' },
+        { value: 'Bunny1m', label: 'Bunny 1.000 points' },
+        { value: 'Bunny500', label: 'Bunny 500 points' },
+    ]
+
     const [selectedMesh, setSelectedMesh] = useState('poisson')
 
     useEffect(() => {
@@ -120,12 +128,18 @@ const App = () => {
 
     return (
         <>
-            <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1000 }}>
+            <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <Selector
-                    options={options}
+                    options={sphere_options}
                     value={selectedMesh}
                     onChange={setSelectedMesh}
-                    label="Choose a mesh "
+                    label="Escull una esfera "
+                />
+                <Selector
+                    options={bunny_options}
+                    value={selectedMesh}
+                    onChange={setSelectedMesh}
+                    label="Escull un conill "
                 />
             </div>
             <div
