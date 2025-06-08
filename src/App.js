@@ -25,6 +25,7 @@ const App = () => {
     ]
 
     const [selectedMesh, setSelectedMesh] = useState('poisson')
+    const [showWireframe, setShowWireframe] = useState(true)
 
     useEffect(() => {
         const mount = mountRef.current
@@ -37,6 +38,14 @@ const App = () => {
         const scene = new THREE.Scene()
         sceneRef.current = scene // Store the scene reference for later use
         scene.background = new THREE.Color(0xf5f5f5) // white-grey
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
+        scene.add(ambientLight)
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+        directionalLight.position.set(10, 20, 10)
+        scene.add(directionalLight)
 
         // Camera
         const { width, height } = getSize()
@@ -100,23 +109,25 @@ const App = () => {
             process.env.PUBLIC_URL + `/${selectedMesh}.obj`,
             (object) => {
                 object.traverse((child) => {
-                    if (child.isMesh) {
-                        // Add mesh material (grey, opaque)
-                        child.material = new THREE.MeshBasicMaterial({
+                    if (child.isMesh && child.geometry && child.geometry.isBufferGeometry) {
+                        // Compute flat normals
+                        child.geometry.computeVertexNormals()
+
+                        // Apply flat-shaded material
+                        child.material = new THREE.MeshStandardMaterial({
                             color: 0xc4c4c4,
-                            wireframe: false,
-                            opacity: 1,
-                            transparent: false,
+                            flatShading: true,
                         })
-                        // Add black wireframe as a separate object
+
+                        // Wireframe overlay
                         const wireframe = new THREE.WireframeGeometry(child.geometry)
                         const line = new THREE.LineSegments(wireframe, new THREE.LineBasicMaterial({ color: 0x000000 }))
-                        line.position.copy(child.position)
-                        line.rotation.copy(child.rotation)
-                        line.scale.copy(child.scale)
+                        line.name = 'wireframe'
+                        line.visible = showWireframe
                         child.add(line)
                     }
                 })
+
                 scene.add(object)
             },
             undefined,
@@ -125,6 +136,20 @@ const App = () => {
             }
         )
     }, [selectedMesh])
+
+    useEffect(() => {
+        const scene = sceneRef.current
+        if (!scene) return
+
+        scene.traverse((child) => {
+            if (child.isMesh) {
+                const wireframe = child.children.find((c) => c.name === 'wireframe')
+                if (wireframe) {
+                    wireframe.visible = showWireframe
+                }
+            }
+        })
+    }, [showWireframe])
 
     return (
         <>
@@ -141,6 +166,14 @@ const App = () => {
                     onChange={setSelectedMesh}
                     label="Escull un conill "
                 />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <input
+                        type="checkbox"
+                        checked={showWireframe}
+                        onChange={(e) => setShowWireframe(e.target.checked)}
+                    />
+                    Show wireframe
+                </label>
             </div>
             <div
                 ref={mountRef}
