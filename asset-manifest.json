@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/surface-reconstruction-demo/static/js/main.ea3a2c2d.js",
+    "main.js": "/surface-reconstruction-demo/static/js/main.ca995211.js",
     "index.html": "/surface-reconstruction-demo/index.html",
-    "main.ea3a2c2d.js.map": "/surface-reconstruction-demo/static/js/main.ea3a2c2d.js.map"
+    "main.ca995211.js.map": "/surface-reconstruction-demo/static/js/main.ca995211.js.map"
   },
   "entrypoints": [
-    "static/js/main.ea3a2c2d.js"
+    "static/js/main.ca995211.js"
   ]
 }
