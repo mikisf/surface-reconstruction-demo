@@ -10,9 +10,9 @@ const App = () => {
     const sceneRef = useRef(null)
 
     const sphere_options = [
-        { value: 'poisson.obj', label: 'Poisson Surface Reconstruction' },
-        { value: 'marching_cubes.obj', label: 'Marching Cubes' },
-        { value: 'marching_tetrahedra.obj', label: 'Marching Tetrahedra' },
+        { value: 'poisson.obj/poisson_points.ply', label: 'Poisson Surface Reconstruction' },
+        { value: 'marching_cubes.obj/marching_cubes_grid.ply', label: 'Marching Cubes' },
+        { value: 'marching_tetrahedra.obj/marching_tetrahedra_mesh.obj', label: 'Marching Tetrahedra' },
         { value: 'poisson_simplified.obj', label: 'Poisson Surface Simplified' },
         { value: 'marching_cubes_simplified.obj', label: 'Marching Cubes Simplified' },
         { value: 'marching_tetrahedra_simplified.obj', label: 'Marching Tetrahedra Simplified' },
@@ -25,7 +25,7 @@ const App = () => {
         { value: 'Bunny500.obj/Bunny.ply', label: 'Bunny 500 points' },
     ]
 
-    const [selectedMesh, setSelectedMesh] = useState('poisson.obj')
+    const [selectedMesh, setSelectedMesh] = useState('poisson.obj/poisson_points.ply')
     const [showWireframe, setShowWireframe] = useState(true)
     const [showInputData, setShowInputData] = useState(false)
 
@@ -108,29 +108,43 @@ const App = () => {
 
         const meshParts = selectedMesh.split('/')
         console.log('Loading mesh parts:', meshParts)
-        for (const part of meshParts) {
+        meshParts.forEach((part, index) => {
             if (part.endsWith('.obj')) {
                 const loader = new OBJLoader()
                 loader.load(
                     process.env.PUBLIC_URL + `/${part}`,
                     (object) => {
                         object.traverse((child) => {
-                            if (child.isMesh && child.geometry && child.geometry.isBufferGeometry) {
-                                // Compute flat normals
-                                child.geometry.computeVertexNormals()
+                            if (index === 0) {
+                                if (child.isMesh && child.geometry && child.geometry.isBufferGeometry) {
+                                    // Compute flat normals
+                                    child.geometry.computeVertexNormals()
 
-                                // Apply flat-shaded material
-                                child.material = new THREE.MeshStandardMaterial({
-                                    color: 0xc4c4c4,
-                                    flatShading: true,
-                                })
+                                    // Apply flat-shaded material
+                                    child.material = new THREE.MeshStandardMaterial({
+                                        color: 0xc4c4c4,
+                                        flatShading: true,
+                                    })
 
-                                // Wireframe overlay
-                                const wireframe = new THREE.WireframeGeometry(child.geometry)
-                                const line = new THREE.LineSegments(wireframe, new THREE.LineBasicMaterial({ color: 0x000000 }))
-                                line.name = 'wireframe'
-                                line.visible = showWireframe
-                                child.add(line)
+                                    // Wireframe overlay
+                                    const wireframe = new THREE.WireframeGeometry(child.geometry)
+                                    const line = new THREE.LineSegments(wireframe, new THREE.LineBasicMaterial({ color: 0x000000 }))
+                                    line.name = 'wireframe'
+                                    line.visible = showWireframe
+                                    child.add(line)
+                                }
+                            } else {
+                                if (child.isMesh && child.geometry && child.geometry.isBufferGeometry) {
+                                    // Remove the mesh's material so only the wireframe is visible
+                                    child.material = new THREE.MeshBasicMaterial({ visible: false })
+
+                                    // Wireframe overlay
+                                    const wireframe = new THREE.WireframeGeometry(child.geometry)
+                                    const line = new THREE.LineSegments(wireframe, new THREE.LineBasicMaterial({ color: 0xffff00 }))
+                                    line.name = 'inputData'
+                                    line.visible = showInputData
+                                    child.add(line)
+                                }
                             }
                         })
 
@@ -161,7 +175,7 @@ const App = () => {
                     }
                 )
             }
-        }
+        })
     }, [selectedMesh])
 
     useEffect(() => {
