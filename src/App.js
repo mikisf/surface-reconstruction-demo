@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { ArcballControls } from 'three/examples/jsm/controls/ArcballControls'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader'
 import Selector from './Selector'
 
 const App = () => {
@@ -9,23 +10,24 @@ const App = () => {
     const sceneRef = useRef(null)
 
     const sphere_options = [
-        { value: 'poisson', label: 'Poisson Surface Reconstruction' },
-        { value: 'marching_cubes', label: 'Marching Cubes' },
-        { value: 'marching_tetrahedra', label: 'Marching Tetrahedra' },
-        { value: 'poisson_simplified', label: 'Poisson Surface Simplified' },
-        { value: 'marching_cubes_simplified', label: 'Marching Cubes Simplified' },
-        { value: 'marching_tetrahedra_simplified', label: 'Marching Tetrahedra Simplified' },
+        { value: 'poisson.obj', label: 'Poisson Surface Reconstruction' },
+        { value: 'marching_cubes.obj', label: 'Marching Cubes' },
+        { value: 'marching_tetrahedra.obj', label: 'Marching Tetrahedra' },
+        { value: 'poisson_simplified.obj', label: 'Poisson Surface Simplified' },
+        { value: 'marching_cubes_simplified.obj', label: 'Marching Cubes Simplified' },
+        { value: 'marching_tetrahedra_simplified.obj', label: 'Marching Tetrahedra Simplified' },
     ]
 
     const bunny_options = [
-        { value: 'Bunny10m', label: 'Bunny 10.000 points' },
-        { value: 'Bunny5m', label: 'Bunny 5.000 points' },
-        { value: 'Bunny1m', label: 'Bunny 1.000 points' },
-        { value: 'Bunny500', label: 'Bunny 500 points' },
+        { value: 'Bunny10m.obj/Bunny.ply', label: 'Bunny 10.000 points' },
+        { value: 'Bunny5m.obj/Bunny.ply', label: 'Bunny 5.000 points' },
+        { value: 'Bunny1m.obj/Bunny.ply', label: 'Bunny 1.000 points' },
+        { value: 'Bunny500.obj/Bunny.ply', label: 'Bunny 500 points' },
     ]
 
-    const [selectedMesh, setSelectedMesh] = useState('poisson')
+    const [selectedMesh, setSelectedMesh] = useState('poisson.obj')
     const [showWireframe, setShowWireframe] = useState(true)
+    const [showInputData, setShowInputData] = useState(false)
 
     useEffect(() => {
         const mount = mountRef.current
@@ -96,45 +98,70 @@ const App = () => {
         const scene = sceneRef.current
         if (!scene) return
 
-        // Remove all existing meshes from the scene
+        // Remove all existing objects from the scene except lights and camera
         for (let i = scene.children.length - 1; i >= 0; i--) {
             const obj = scene.children[i]
-            if (obj.type === 'Group' || obj.isMesh) {
+            if (!(obj.isLight || obj.isCamera)) {
                 scene.remove(obj)
             }
         }
 
-        const loader = new OBJLoader()
-        loader.load(
-            process.env.PUBLIC_URL + `/${selectedMesh}.obj`,
-            (object) => {
-                object.traverse((child) => {
-                    if (child.isMesh && child.geometry && child.geometry.isBufferGeometry) {
-                        // Compute flat normals
-                        child.geometry.computeVertexNormals()
+        const meshParts = selectedMesh.split('/')
+        console.log('Loading mesh parts:', meshParts)
+        for (const part of meshParts) {
+            if (part.endsWith('.obj')) {
+                const loader = new OBJLoader()
+                loader.load(
+                    process.env.PUBLIC_URL + `/${part}`,
+                    (object) => {
+                        object.traverse((child) => {
+                            if (child.isMesh && child.geometry && child.geometry.isBufferGeometry) {
+                                // Compute flat normals
+                                child.geometry.computeVertexNormals()
 
-                        // Apply flat-shaded material
-                        child.material = new THREE.MeshStandardMaterial({
-                            color: 0xc4c4c4,
-                            flatShading: true,
+                                // Apply flat-shaded material
+                                child.material = new THREE.MeshStandardMaterial({
+                                    color: 0xc4c4c4,
+                                    flatShading: true,
+                                })
+
+                                // Wireframe overlay
+                                const wireframe = new THREE.WireframeGeometry(child.geometry)
+                                const line = new THREE.LineSegments(wireframe, new THREE.LineBasicMaterial({ color: 0x000000 }))
+                                line.name = 'wireframe'
+                                line.visible = showWireframe
+                                child.add(line)
+                            }
                         })
 
-                        // Wireframe overlay
-                        const wireframe = new THREE.WireframeGeometry(child.geometry)
-                        const line = new THREE.LineSegments(wireframe, new THREE.LineBasicMaterial({ color: 0x000000 }))
-                        line.name = 'wireframe'
-                        line.visible = showWireframe
-                        child.add(line)
+                        scene.add(object)
+                    },
+                    undefined,
+                    (error) => {
+                        console.error('Error loading OBJ:', error)
                     }
-                })
-
-                scene.add(object)
-            },
-            undefined,
-            (error) => {
-                console.error('Error loading OBJ:', error)
+                )
+            } else if (part.endsWith('.ply')) {
+                const loader = new PLYLoader()
+                loader.load(
+                    process.env.PUBLIC_URL + `/${part}`,
+                    (geometry) => {
+                        const material = new THREE.PointsMaterial({
+                            color: 0xffff00,
+                            size: 0.1,
+                        })
+                        const pcd = new THREE.Points(geometry, material)
+                        pcd.name = 'inputData'
+                        pcd.visible = showInputData
+                        scene.add(pcd)
+                    },
+                    undefined,
+                    (error) => {
+                        console.error('Error loading PLY:', error)
+                    }
+                )
             }
-        )
+        }
     }, [selectedMesh])
 
     useEffect(() => {
@@ -150,6 +177,17 @@ const App = () => {
             }
         })
     }, [showWireframe])
+
+    useEffect(() => {
+        const scene = sceneRef.current
+        if (!scene) return
+
+        scene.traverse((child) => {
+            if (child.name === 'inputData') {
+                child.visible = showInputData
+            }
+        })
+    }, [showInputData])
 
     return (
         <>
@@ -173,6 +211,14 @@ const App = () => {
                         onChange={(e) => setShowWireframe(e.target.checked)}
                     />
                     Show wireframe
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <input
+                        type="checkbox"
+                        checked={showInputData}
+                        onChange={(e) => setShowInputData(e.target.checked)}
+                    />
+                    Show input data
                 </label>
             </div>
             <div
