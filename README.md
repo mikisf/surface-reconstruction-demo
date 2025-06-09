@@ -1,70 +1,99 @@
-# Getting Started with Create React App
+# Visualització i Anàlisi de Superfícies
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Aquest projecte permet visualitzar models 3D generats a partir de diferents algorismes de reconstrucció de superfícies, com Poisson Surface Reconstruction, Marching Cubes i Marching Tetrahedra, i simplificats utilitzant mètriques d'error quàdriques (QEM).
 
-## Available Scripts
+## 🚀 Descripció del Projecte
 
-In the project directory, you can run:
+La pàgina web permet carregar i visualitzar superfícies 3D en temps real. Els models 3D són carregats des de fitxers `.obj` i `.ply`, i es poden amb el wireframe.
 
-### `npm start`
+Els models inclouen superfícies generades mitjançant els algorismes:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+-   **Poisson Surface Reconstruction**
+-   **Marching Cubes**
+-   **Marching Tetrahedra**
+-   **Superfícies Simplificades (Poisson, Marching Cubes, Marching Tetrahedra)**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+A més, es poden comparar diversos models del conill de Stanford (`Bunny`) amb diferents quatitats de cares.
 
-### `npm test`
+## 🛠️ Funcionalitats
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. **Selector de Model**
 
-### `npm run build`
+Els usuaris poden triar entre diversos models per visualitzar. Hi ha dues opcions principals:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+-   **Esferes (Superfícies generades per algoritmes):**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    -   _Poisson Surface Reconstruction_
+    -   _Marching Cubes_
+    -   _Marching Tetrahedra_
+    -   _Poisson Simplificat_
+    -   _Marching Cubes Simplificat_
+    -   _Marching Tetrahedra Simplificat_
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+-   **Conill (Bunny) amb diferents nombres de cares:**
+    -   _Bunny 10.000 cares_
+    -   _Bunny 5.000 cares_
+    -   _Bunny 1.000 cares_
+    -   _Bunny 500 cares_
 
-### `npm run eject`
+### 2. **Visualització del Wireframe i Dades d'Entrada**
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Els usuaris poden activar o desactivar la visualització del wireframe (estructura de línies del model) i de les dades d'entrada (els punts utilitzats per generar la superfície). Aquesta funcionalitat permet veure millor les característiques internes dels models.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 3. **Mètriques del Model**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Les mètriques associades al model seleccionat es mostren a la part dreta de la pantalla. Aquestes mètriques inclouen estadístiques com la regularitat dels vèrtexs, les àrees dels triangles, la degeneració, el nombre de forats i l'exactitud de la malla.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## ⚙️ Tecnologies Utilitzades
 
-## Learn More
+-   **Three.js**: Per la visualització en 3D i la gestió de la interacció amb els models.
+-   **ArcballControls**: Per permetre la rotació i moviment de la càmera en 3D.
+-   **OBJLoader / PLYLoader**: Per carregar els models 3D des de fitxers `.obj` i `.ply`.
+-   **React.js**: Per gestionar l'estat de la pàgina i la interacció amb l'usuari.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 📦 Com executar el projecte
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Per executar aquest projecte localment, segueix aquests passos:
 
-### Code Splitting
+1. **Clonar el repositori:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+    ```bash
+    git clone https://github.com/username/repo.git
+    cd repo
+    ```
 
-### Analyzing the Bundle Size
+2. **Instal·lar les dependències:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+    ```bash
+    npm install
+    ```
 
-### Making a Progressive Web App
+3. **Iniciar el servidor de desenvolupament:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+    ```bash
+    npm start
+    ```
 
-### Advanced Configuration
+Aquesta acció iniciarà el servidor i obrirà la pàgina web al teu navegador localment (per defecte a `http://localhost:3000`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 📝 Descripció del Codi
 
-### Deployment
+### Components Principals:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+-   **App**:  
+    El component principal de la pàgina web que gestiona la càrrega dels models, l'estat de la visualització i la interacció amb l'usuari.
 
-### `npm run build` fails to minify
+    -   **Càrrega de Models 3D**:  
+        Els models són carregats a l'escena utilitzant les funcions `OBJLoader` i `PLYLoader`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    -   **Selector de Models**:  
+        Permet als usuaris triar entre diferents models i superfícies.
+
+    -   **Controls d'Interacció**:  
+        Utilitza `ArcballControls` per controlar la rotació i el desplaçament de la vista en 3D.
+
+-   **Selector**:  
+    Un component personalitzat que permet als usuaris seleccionar un model de la llista de models disponibles.
+
+-   **Metrics**:  
+    Mostra les mètriques del model carregat, com la regularitat dels vèrtexs i la precisió de la superfície.
