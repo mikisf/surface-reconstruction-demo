@@ -4,6 +4,8 @@ import { ArcballControls } from 'three/examples/jsm/controls/ArcballControls'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader'
 import Selector from './Selector'
+import metricsMap from './metricsMap'
+import Metrics from './Metrics'
 
 const App = () => {
     const mountRef = useRef(null)
@@ -28,6 +30,8 @@ const App = () => {
     const [selectedMesh, setSelectedMesh] = useState('poisson.obj/poisson_points.ply')
     const [showWireframe, setShowWireframe] = useState(true)
     const [showInputData, setShowInputData] = useState(false)
+
+    const [metrics, setMetrics] = useState(null)
 
     useEffect(() => {
         const mount = mountRef.current
@@ -203,6 +207,10 @@ const App = () => {
         })
     }, [showInputData])
 
+    useEffect(() => {
+        setMetrics(metricsMap[selectedMesh] || null)
+    }, [selectedMesh])
+
     return (
         <>
             <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -235,6 +243,7 @@ const App = () => {
                     Show input data
                 </label>
             </div>
+            <Metrics metrics={metrics} />
             <div
                 ref={mountRef}
                 style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}
